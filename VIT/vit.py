@@ -1,5 +1,3 @@
-from curses.ascii import FF
-from turtle import forward
 import torch
 import torch.nn as nn
 
@@ -31,7 +29,7 @@ class MultiHeadSelfAttention(nn.Module):
         self.dimD = nheads * dim_head
         self.z = dim_head ** -0.5
 
-        self.dropout = nn.Dropou(dropout)
+        self.dropout = nn.Dropout(dropout)
 
         self.Mq = nn.Linear(dim, self.dimD, bias=False)
         self.Mk = nn.Linear(dim, self.dimD, bias=False)
@@ -83,15 +81,23 @@ class TransformerBlock(nn.Module):
         return ffn_out
 
 class Transformer(nn.Module):
-    def __init__(self, depth, dim, hidden_dim, nheads, dim_head, dropout, activation):
+    def __init__(self,
+    depth,
+    dim,
+    hidden_dim,
+    nheads,
+    dim_head,
+    dropout,
+    activation):
         super().__init__()
-
         self.layers = nn.ModuleList([])
         for _ in range(depth):
             self.layers.append(TransformerBlock(dim, hidden_dim, nheads, dim_head, dropout, activation))
 
     def forward(self, x):
-        return self.layers(x)
+        for f in self.layers:
+            x = f(x)
+        return x
 
 class Vit(nn.Module):
     def __init__(self,
@@ -132,9 +138,10 @@ class Vit(nn.Module):
     
     def forward(self, img):
         bs, c, h, w = img.shape
-        inp = img.reshape(bs, c, h//self.PH, self.PH,  w//self.PW, self.PW).permute(0,2,4,3,5,1).reshape(bs, self.nPatches, self.dim_patch )
-
-        cls_token = self.cls_token.repeat(bs, 0)
+        inp = img.reshape(bs, c, h//self.PH, self.PH,  w//self.PW, self.PW).permute(0,2,4,3,5,1).reshape(bs, self.nPatches, self.dim_patch)
+        inp = self.to_emb(inp)
+        cls_token = self.cls_token.repeat(bs, 1, 1)
+        print(inp.shape)
         inp = torch.cat((cls_token, inp), dim=1)
         inp += self.pos_embedding[:, :(h*w + 1)]
         inp = self.dropout(inp)
@@ -147,3 +154,9 @@ class Vit(nn.Module):
             out = out[:, 0]
 
         return self.head(out)
+
+
+model = Vit((256, 256), (32, 32), 8, 256, 3, 512)
+out = model(torch.rand(5, 3, 256, 256))
+
+print(out.shape)
