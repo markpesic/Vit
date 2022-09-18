@@ -1,5 +1,5 @@
 # Vit
-## Vit implementation in pytorch [AN IMAGE IS WORTH 16X16 WORDS:TRANSFORMERS FOR IMAGE RECOGNITION AT SCALE](https://arxiv.org/abs/2010.11929)
+## Vit implementation in pytorch [An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale](https://arxiv.org/abs/2010.11929)
 
 ![vit architecture](https://github.com/markpesic/vit/blob/master/images/vit.png?raw=true)
 
