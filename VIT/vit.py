@@ -1,3 +1,4 @@
+from typing import Any, Tuple
 import torch
 import torch.nn as nn
 
@@ -101,12 +102,12 @@ class Transformer(nn.Module):
 
 class Vit(nn.Module):
     def __init__(self,
-    image_size,
-    patch_size,
-    num_classes,
-    dim,
-    depth,
-    hidden_dim,
+    image_size: Tuple[int, int],
+    patch_size: Tuple[int, int],
+    num_classes: int,
+    dim: int,
+    depth: int,
+    hidden_dim: int,
     nheads=8,
     dim_head=64,
     dropout=0.1,
@@ -141,7 +142,6 @@ class Vit(nn.Module):
         inp = img.reshape(bs, c, h//self.PH, self.PH,  w//self.PW, self.PW).permute(0,2,4,3,5,1).reshape(bs, self.nPatches, self.dim_patch)
         inp = self.to_emb(inp)
         cls_token = self.cls_token.repeat(bs, 1, 1)
-        print(inp.shape)
         inp = torch.cat((cls_token, inp), dim=1)
         inp += self.pos_embedding[:, :(h*w + 1)]
         inp = self.dropout(inp)
